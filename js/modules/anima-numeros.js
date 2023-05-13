@@ -1,40 +1,64 @@
-export default function initAnimaNumeros() {
+export default class AnimaNumeros {
 
-    function animaNumeros(){
-        const numeros = document.querySelectorAll('[data-numero');
-    
-        numeros.forEach(numero => {
-        
-            const total = +numero.textContent;
-            const incremento = Math.floor(total / 100);
-            let start = 0;
-        
-            const timer = setInterval(() => {
-                start += incremento;
-                numero.textContent = start;
-                if(start > total){
-                
-                    numero.textContent = total;
-                    clearInterval(timer);
-                
-                } 
-                    
-            },25 * Math.random());
-        
-        });    
+    constructor(numeros, observerTarget ,observerClass){
+
+        this.numeros = document.querySelectorAll(numeros);
+        this.observerTarget = document.querySelector(observerTarget);
+        this.observerClass = observerClass;
+
+        this.handleMutation = this.handleMutation.bind(this);
+
     }
-    
-    const observerTarget = document.querySelector('.numeros');
-    let observer;
 
-    function handleMutation(mutation){
-        if(mutation[0].target.classList.contains('ativo')){
-            observer.disconnect();
-            animaNumeros();
+    // colocamos como static toda funcao que não use atributos internos
+    // em sua estrutura
+    static incrementarNumero(numero) {
+        
+        const total = +numero.textContent;
+        const incremento = Math.floor(total / 100);
+        let start = 0;
+    
+        const timer = setInterval(() => {
+            start += incremento;
+            numero.textContent = start;
+            if(start > total){
+            
+                numero.textContent = total;
+                clearInterval(timer);
+            
+            } 
+                
+        },25 * Math.random());
+
+    }
+
+    animaNumeros(){
+
+        this.numeros.forEach(numero => {
+            // conseguimos acessar funções static somente chamando
+            // o construtor da classe antes 
+            this.constructor.incrementarNumero(numero);
+        });    
+
+    }
+
+    handleMutation(mutation){
+        if(mutation[0].target.classList.contains(this.observerClass)){
+            this.observer.disconnect();
+            this.animaNumeros();
         }
     }
-    
-    observer = new MutationObserver(handleMutation);
-    observer.observe(observerTarget, {attributes: true});
+
+    addMutationObserver(){
+        this.observer = new MutationObserver(this.handleMutation);
+        this.observer.observe(this.observerTarget, {attributes: true});
+    }
+
+    init(){
+        if(this.numeros.length && this.observerTarget){
+            this.addMutationObserver();
+        }
+        return this;
+    }
 
 }
