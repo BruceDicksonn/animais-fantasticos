@@ -50,3 +50,10 @@
     border-bottom: 10px solid #e54;
 
 }
+
+@media(max-width: 700px) {
+    [data-dropdown]  .dropdown-menu{
+        animation: show-up .3s forwards;
+        display: block;
+    }    
+}
